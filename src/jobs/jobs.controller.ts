@@ -16,7 +16,6 @@ export class JobsController {
     @Get(':title')
     async getJobByTitle(@Param('title') title: string) {
         const jobTitle = await this.jobService.getJobByTitle(title)
-        console.log("hola")
         if (!jobTitle) throw new NotFoundException('Job does not exist');
         return jobTitle
     }

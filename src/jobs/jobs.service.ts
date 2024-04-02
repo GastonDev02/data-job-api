@@ -10,16 +10,30 @@ export class JobsService {
     constructor(@InjectModel(Job.name) private taskModel: Model<Job>) { }
 
     getJobs() {
-        return this.taskModel.find()
+        try {
+            return this.taskModel.find()
+        } catch (error) {
+            console.log(error)
+        }
+
     }
 
     async getJobByTitle(jobTitle: string) {
-        const getById = await this.taskModel.findOne({ jobTitle })
-        return getById
+        try {
+            const getById = await this.taskModel.findOne({ jobTitle })
+            return getById;
+        } catch (error) {
+            console.log(error)
+        }
     }
 
-    async createJob(job: CreateJobDto) {{
-        const createJob = await this.taskModel.create(job)
-        await createJob.save()
-    }}
+    async createJob(job: CreateJobDto) {
+        try {
+            const createJob = await this.taskModel.create(job)
+            await createJob.save()
+        } catch (error) {
+            console.log(error)
+        }
+
+    }
 }
