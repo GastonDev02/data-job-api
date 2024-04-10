@@ -1,7 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsUrl } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsMongoId } from 'class-validator';
+import { ObjectId } from 'mongoose';
 
 export class CreateJobDto {
+  @IsMongoId()
+  _id: ObjectId
+  
   @IsNotEmpty()
   @IsString()
   jobTitle: string;
@@ -14,8 +18,8 @@ export class CreateJobDto {
   @IsString()
   location: string;
 
-  @IsNotEmpty()
-  salary: number;
+  @IsOptional()
+  salary?: number;
 
   @IsNotEmpty()
   @IsString()
@@ -38,20 +42,18 @@ export class CreateJobDto {
   modality: string;
 
   @IsOptional()
-  @IsString()
-  companyMail: string | null;
+  companyMail?: string | null;
 
   @IsOptional()
-  @IsUrl()
-  linkedin: string | null;
+  linkedin?: string | null;
 
   @IsNotEmpty()
   @IsString()
   jobImage: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  posted: string | Date;
+  posted: string;
 
   @IsNotEmpty()
   @IsString()

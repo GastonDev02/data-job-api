@@ -27,7 +27,7 @@ export class JobsController {
             return createJob;
         } catch (error) {
             if (error.code === 11000) {
-                throw new ConflictException('Task already exists');
+                throw new ConflictException('Job already exists');
             }
             throw error;
         }

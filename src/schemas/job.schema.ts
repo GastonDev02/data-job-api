@@ -41,7 +41,7 @@ export class Job {
   jobImage: string;
 
   @Prop({ required: true, type: Date })
-  posted: string | Date;  
+  posted: Date;   
 
   @Prop({ required: true })
   country: string;
