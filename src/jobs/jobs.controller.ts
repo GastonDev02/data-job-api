@@ -20,10 +20,10 @@ export class JobsController {
         return jobTitle
     }
 
-    @Post()
-    async createJob(@Body() body: CreateJobDto) {
+    @Post('/post-job/:userId')
+    async createJob(@Param('userId') userId: string ,@Body() body: CreateJobDto) {
         try {
-            const createJob = await this.jobService.createJob(body)
+            const createJob = await this.jobService.createJob(userId, body)
             return createJob;
         } catch (error) {
             if (error.code === 11000) {

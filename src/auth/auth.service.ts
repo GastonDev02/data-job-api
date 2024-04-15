@@ -8,6 +8,8 @@ import { hash, compare } from 'bcrypt'
 import { LoginAuthDto } from 'src/dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 
+
+
 @Injectable()
 export class AuthService {
     constructor(@InjectModel(User.name) private userModel: Model<User>,
@@ -18,8 +20,8 @@ export class AuthService {
         try {
             const { fullname, email, password } = user;
             const hashPassword = await hash(password, 10)
-            const findUserRegistered = await this.userModel.findOne({email})
-            if(findUserRegistered) throw new HttpException('The email entered already exists', HttpStatus.BAD_REQUEST)
+            const findUserRegistered = await this.userModel.findOne({ email })
+            if (findUserRegistered) throw new HttpException('The email entered already exists', HttpStatus.BAD_REQUEST)
 
             const newUser = {
                 fullname,
@@ -41,13 +43,15 @@ export class AuthService {
             const findUser = await this.userModel.findOne({ email })
             const checkPassword = await compare(password, findUser.password)
 
-            if (!findUser) throw new HttpException('User not found' ,HttpStatus.NOT_FOUND)
+            if (!findUser) throw new HttpException('User not found', HttpStatus.NOT_FOUND)
             if (!checkPassword) throw new HttpException('Password incorrect', HttpStatus.BAD_REQUEST)
 
             const payload = {
                 userId: findUser._id,
                 fullname: findUser.fullname,
-                role: findUser.role
+                role: findUser.role,
+                email: findUser.email,
+                userImage: findUser.imageProfile
             }
             const accesToken = this.jwtService.sign(payload)
 
@@ -58,7 +62,6 @@ export class AuthService {
 
     }
 
-   
     
 
 }

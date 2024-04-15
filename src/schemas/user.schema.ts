@@ -11,28 +11,39 @@ export class User extends Document {
   email: string;
 
   @Prop({ required: true })
-  password: string; 
+  password: string;
 
-  @Prop({required: false})
+  @Prop({ required: false })
   description: string;
 
-  @Prop({required: false})
+  @Prop({ required: false })
   phone: number;
 
-  @Prop({required: false})
+  @Prop({ required: false })
   imageProfile: string;
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Post' }], default: [] })
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Job' }], default: [] })
   jobSaved: Types.ObjectId[];
 
-  @Prop({required: false})
+  @Prop({ required: false })
   location: string;
 
   @Prop({ required: false, enum: ['user', 'admin', 'company'], default: 'user' })
   role: string;
 
-  @Prop({required: false, default: []})
+  @Prop({ required: false, default: [] })
   skills: string[]
+
+  @Prop({
+    type: [
+      {
+        applicant: { type: Types.ObjectId, ref: 'User' },
+        jobTo: String,
+      },
+    ],
+    default: [],
+  })
+  applicants: { applicant: Types.ObjectId; jobTo: string }[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

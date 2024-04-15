@@ -1,9 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Types, Document } from 'mongoose';
 
 
 @Schema({ timestamps: true })
-export class Job {
+export class Job extends Document {
   @Prop({ required: true })
   jobTitle: string;
 
@@ -45,6 +46,9 @@ export class Job {
 
   @Prop({ required: true })
   country: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  author: Types.ObjectId;
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job);

@@ -1,10 +1,7 @@
 /* eslint-disable prettier/prettier */
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsMongoId } from 'class-validator';
-import { ObjectId } from 'mongoose';
+import { IsString, IsNotEmpty, IsEnum, IsOptional } from 'class-validator';
 
 export class CreateJobDto {
-  @IsMongoId()
-  _id: ObjectId
   
   @IsNotEmpty()
   @IsString()
@@ -12,7 +9,7 @@ export class CreateJobDto {
 
   @IsNotEmpty()
   @IsString()
-  description: string;
+  description: string;s
 
   @IsNotEmpty()
   @IsString()

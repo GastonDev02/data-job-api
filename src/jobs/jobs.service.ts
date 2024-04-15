@@ -36,13 +36,19 @@ export class JobsService {
         }
     }
 
-    async createJob(job: CreateJobDto) {
+    async createJob(userId: string, job: CreateJobDto) {
         try {
-            const createJob = await this.jobModel.create(job)
-            await createJob.save()
+            const newJobData = {
+                ...job,
+                author: userId
+            };
+    
+            const createJob = await this.jobModel.create(newJobData);
+            await createJob.save();
+    
+            return createJob;
         } catch (error) {
-            throw new HttpException(`Interval Server Error: ${error}`, 500)
+            throw new HttpException(`Interval Server Error: ${error}`, 500);
         }
-
     }
 }
