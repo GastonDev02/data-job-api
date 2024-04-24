@@ -51,7 +51,7 @@ export class AuthService {
                 fullname: findUser.fullname,
                 role: findUser.role,
                 email: findUser.email,
-                userImage: findUser.imageProfile
+                userImage: findUser.userImage
             }
             const accesToken = this.jwtService.sign(payload)
 

@@ -35,7 +35,7 @@ export class UserService {
             phone: user.phone,
             jobSaved: user.jobSaved,
             skills: user.skills,
-            imageProfile: user.imageProfile
+            userImage: user.userImage
 
         }
 
@@ -91,19 +91,22 @@ export class UserService {
 
     async deleteRequest(userId: string, applicantId: string) {
         try {
-            const jobRequests = await this.getRequestJobs(userId);
+            const user = await this.userModel.findById(userId);
 
-            const index = jobRequests.findIndex(applicant => applicant.user._id.toString() === applicantId);
+            if (!user) {
+                throw new NotFoundException('User not found');
+            }
+
+            // Encontrar el índice del solicitante en el array
+            const index = user.applicants.findIndex(applicant => applicant.applicant.toString() === applicantId);
 
             if (index !== -1) {
-                jobRequests.splice(index, 1);
+                // Eliminar el solicitante específico del array
+                user.applicants.splice(index, 1);
 
-                const updatedUser = await this.userModel.findByIdAndUpdate(
-                    userId,
-                    { applicants: jobRequests.map(applicant => applicant._id) },
-                    { new: true }
-                );
-                await updatedUser.save()
+                // Guardar los cambios en el documento de usuario
+                const updatedUser = await user.save();
+
                 return updatedUser;
             } else {
                 throw new NotFoundException('Applicant not found');
@@ -112,6 +115,7 @@ export class UserService {
             throw error;
         }
     }
+
 
 
     //USER SAVE A JOB
@@ -204,14 +208,14 @@ export class UserService {
     //USER IMAGE
 
     async updateImage(userId: string | undefined, newImage: ChangeImageDto) {
-        const { imageProfile } = newImage
+        const { userImage } = newImage
         const user = await this.userModel.findById(userId);
 
         if (!user) {
             throw new NotFoundException('User not found');
         }
 
-        user.imageProfile = imageProfile;
+        user.userImage = userImage;
         await user.save();
         return user;
     }
@@ -270,11 +274,12 @@ export class UserService {
                 throw new NotFoundException('Company not found');
             }
 
-            const verifyIfUserApplied = company.applicants.some(
-                (a) => a.applicant.toString() === userApplicant._id.toString()
+            // Verificar si el usuario ya ha aplicado a esta oferta
+            const hasAlreadyApplied = company.applicants.some(
+                (app) => app.applicant.toString() === userId && app.jobTo === jobToApplies.jobTitle
             );
 
-            if (verifyIfUserApplied) {
+            if (hasAlreadyApplied) {
                 throw new HttpException('You have already applied for this offer', 400);
             }
 
@@ -292,8 +297,15 @@ export class UserService {
                 );
             }
 
-            // Agregar la aplicación al array de aplicaciones
-            company.applicants.push({ applicant: userApplicant._id, jobTo: jobToApplies.jobTitle });
+
+            if (!company.applicants) {
+                company.applicants = [];
+            }
+
+
+            company.applicants.push({ applicant: userApplicant._id, jobTo: jobToApplies.jobTitle, displayed: false });
+
+
             await company.save();
 
             return {
@@ -302,6 +314,35 @@ export class UserService {
         } catch (error) {
             throw error;
         }
+    }
+
+    async markAsView(userId: string, applicantId: string) {
+        const userCompany = await this.userModel.findById(userId);
+    
+        for (const ap of userCompany.applicants) {
+            if (ap.applicant.toString() === applicantId && !ap.displayed) {
+                ap.displayed = true;
+                const applicantUser = await this.userModel.findById(ap.applicant);
+                const jobToApplies = await this.jobService.getJobByTitle(ap.jobTo);
+    
+                if (applicantUser && applicantUser.email && jobToApplies && jobToApplies.jobTitle) {
+                    this.mailerService.sendMail({
+                        from: 'DataJob',
+                        to: applicantUser.email,
+                        subject: "They have seen your profile!",
+                        html: `<h1>Hello <span style="color: #ff7f50; font-weight: bold;">${applicantUser.fullname}</span>!</h1>
+                               <br></br/>
+                               <p>We know you applied for the <span style="color: #ff7f50; font-weight: bold;">${jobToApplies.jobTitle}</span> offer. Congratulations! A recruiter saw your application. 
+                               If they move forward, they will be communicating directly with you!</p>`,
+                    });
+                }
+    
+                break;
+            }
+        }
+    
+        await userCompany.save();
+        return userCompany.applicants;
     }
 
     // RECOVER PASSWORD
@@ -351,8 +392,8 @@ export class UserService {
             user.password = hashedNewPassword;
             await user.save();
         } catch (error) {
-            if(error.message === "jwt malformed") throw new HttpException('Invalid token. Please return a send the recover email', HttpStatus.BAD_REQUEST)
-            if(error.message === "jwt expired") throw new HttpException('Token expired', HttpStatus.UNAUTHORIZED)
+            if (error.message === "jwt malformed") throw new HttpException('Invalid token. Please return a send the recover email', HttpStatus.BAD_REQUEST)
+            if (error.message === "jwt expired") throw new HttpException('Token expired', HttpStatus.UNAUTHORIZED)
             throw error;
         }
     }

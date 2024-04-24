@@ -49,5 +49,6 @@ import { mailing } from 'src/user/nodeMail';
   ],
   controllers: [UserController],
   providers: [UserService],
+  exports: [UserService]
 })
 export class UserModule {}

@@ -32,7 +32,7 @@ export class UserDto {
     description: string;
 
     @IsString()
-    imageProfile: string;
+    userImage: string;
 }
 
 export class RoleDto {
@@ -50,11 +50,23 @@ export class ChangeInfoDto {
 
 export class ChangeImageDto {
     @IsString()
-    imageProfile: string;
+    userImage: string;
 }
 
 export class AddSkillsDto {
     @ArrayMinSize(1)
     @IsString({ each: true })
     skills: string[];
-  }
+}
+
+export class RequestDto {
+    fullname: string;
+
+    experience: string;
+
+    emailContact: string;
+
+    phoneNumber: number;
+
+    curriculum: string;
+}

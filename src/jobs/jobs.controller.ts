@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Body, Param, NotFoundException, ConflictException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, NotFoundException, ConflictException, Res, HttpStatus } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from 'src/dto/create-job.dto';
+import { Response } from 'express';
 
 @Controller('jobs')
 export class JobsController {
@@ -11,6 +12,23 @@ export class JobsController {
     @Get()
     async getAllJobs() {
         return await this.jobService.getJobs()
+    }
+
+    @Get('/get-latest-jobs')
+    async getLatestJobs(@Res() res: Response) {
+        try {
+            const latestJobs = await this.jobService.getLatest()
+            return res.status(HttpStatus.OK).json({
+                statusCode: 200,
+                latestJobs
+            });
+        } catch (error) {
+            return res.json({
+                error: error.message,
+                message: "An error ocurred",
+                statusCode: error.status
+            });
+        }
     }
 
     @Get(':title')

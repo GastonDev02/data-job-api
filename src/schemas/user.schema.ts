@@ -20,7 +20,7 @@ export class User extends Document {
   phone: number;
 
   @Prop({ required: false })
-  imageProfile: string;
+  userImage: string;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Job' }], default: [] })
   jobSaved: Types.ObjectId[];
@@ -39,11 +39,12 @@ export class User extends Document {
       {
         applicant: { type: Types.ObjectId, ref: 'User' },
         jobTo: String,
+        displayed: {type: Boolean, required: false}
       },
     ],
     default: [],
   })
-  applicants: { applicant: Types.ObjectId; jobTo: string }[];
+  applicants: { applicant: Types.ObjectId; jobTo: string, displayed: boolean }[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

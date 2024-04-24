@@ -195,6 +195,25 @@ export class UserController {
         });
     }
 
+    @Put('/mark-request-view/:userId/:applicantId')
+    async markARequestView(@Param('userId') userId: string, @Param('applicantId') applicantId: string, @Res() res: Response){
+        try {
+            const markAsViewUpdateApplicants = await this.userService.markAsView(userId, applicantId)
+            return res.status(200).json({
+                message: 'We will notify the user that you have seen their application',
+                response: markAsViewUpdateApplicants,
+                status: 200,
+            });
+        } catch (error) {
+            const statusCode = error.status || 500;
+            return res.status(statusCode).json({
+                message: error.message || 'Internal Server Error',
+                error: error.name || 'UnknownError',
+                status: statusCode,
+            });
+        }
+    }
+
     //RECOVER PASSWORD
     @Post('/send-email-recover/:email')
     async sendEmailToRecoverPass(@Param('email') userEmail: string, @Res() res: Response) {

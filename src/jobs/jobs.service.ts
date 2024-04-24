@@ -18,6 +18,14 @@ export class JobsService {
 
     }
 
+    async getLatest() {
+        try {
+            return await this.jobModel.find().sort({ createdAt: -1 }).limit(10);
+        } catch (error) {
+            throw error
+        }
+    }
+
     async getJobById(id: string) {
         try {
             const jobId = await this.jobModel.findById(id);
