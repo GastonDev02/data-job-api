@@ -11,6 +11,7 @@ import { hash, compare } from 'bcrypt'
 //NODEMAILER
 import { NewPasswordDto } from 'src/dto/new-password.dto';
 import { MailerService } from '@nestjs-modules/mailer';
+import { PaymentDto } from 'src/dto/payment.dto';
 
 @Injectable()
 export class UserService {
@@ -35,8 +36,8 @@ export class UserService {
             phone: user.phone,
             jobSaved: user.jobSaved,
             skills: user.skills,
-            userImage: user.userImage
-
+            userImage: user.userImage,
+            balance: user.balance
         }
 
         return userFilter;
@@ -318,13 +319,13 @@ export class UserService {
 
     async markAsView(userId: string, applicantId: string) {
         const userCompany = await this.userModel.findById(userId);
-    
+
         for (const ap of userCompany.applicants) {
             if (ap.applicant.toString() === applicantId && !ap.displayed) {
                 ap.displayed = true;
                 const applicantUser = await this.userModel.findById(ap.applicant);
                 const jobToApplies = await this.jobService.getJobByTitle(ap.jobTo);
-    
+
                 if (applicantUser && applicantUser.email && jobToApplies && jobToApplies.jobTitle) {
                     this.mailerService.sendMail({
                         from: 'DataJob',
@@ -336,11 +337,11 @@ export class UserService {
                                If they move forward, they will be communicating directly with you!</p>`,
                     });
                 }
-    
+
                 break;
             }
         }
-    
+
         await userCompany.save();
         return userCompany.applicants;
     }
@@ -394,6 +395,49 @@ export class UserService {
         } catch (error) {
             if (error.message === "jwt malformed") throw new HttpException('Invalid token. Please return a send the recover email', HttpStatus.BAD_REQUEST)
             if (error.message === "jwt expired") throw new HttpException('Token expired', HttpStatus.UNAUTHORIZED)
+            throw error;
+        }
+    }
+
+    //PAYMENT
+
+    async payment(userId: string, paymentPlan: PaymentDto) {
+        try {
+            const { plan, planPrice } = paymentPlan;
+            const user = await this.userModel.findById(userId)
+
+            let newBalance: number;
+            if (user.balance < 10) {
+                throw new HttpException('You don`t have enought to carry out this operation', HttpStatus.CONFLICT)
+            } else {
+                if (plan === "Basic") {
+                    user.role = "company"
+                    newBalance = user.balance - planPrice
+                    user.balance = newBalance;
+                    await user.save()
+                    return newBalance
+                }
+                if (plan === "Premium") {
+                    user.role = "admin"
+                    newBalance = user.balance - planPrice
+                    user.balance = newBalance;
+                    await user.save()
+                    return newBalance;
+                }
+            }
+
+            return newBalance;
+
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async getBalance(userId: string) {
+        try {
+            const user = await this.userModel.findById(userId)
+            return user.balance;
+        } catch (error) {
             throw error;
         }
     }

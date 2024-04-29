@@ -4,6 +4,7 @@ import { UserService } from './user.service';
 import { AddSkillsDto, ChangeImageDto, ChangeInfoDto, RoleDto } from 'src/dto/user.dto';
 import { Response } from 'express';
 import { NewPasswordDto } from 'src/dto/new-password.dto';
+import { PaymentDto } from 'src/dto/payment.dto';
 
 @Controller('user')
 export class UserController {
@@ -196,7 +197,7 @@ export class UserController {
     }
 
     @Put('/mark-request-view/:userId/:applicantId')
-    async markARequestView(@Param('userId') userId: string, @Param('applicantId') applicantId: string, @Res() res: Response){
+    async markARequestView(@Param('userId') userId: string, @Param('applicantId') applicantId: string, @Res() res: Response) {
         try {
             const markAsViewUpdateApplicants = await this.userService.markAsView(userId, applicantId)
             return res.status(200).json({
@@ -239,6 +240,45 @@ export class UserController {
             await this.userService.recoverPassword(newToken, userNewPass)
             return res.status(200).json({
                 message: 'The password has been changed successfully',
+                status: 200,
+            });
+        } catch (error) {
+            const statusCode = error.status || 500;
+            return res.status(statusCode).json({
+                message: error.message || 'Internal Server Error',
+                error: error.name || 'UnknownError',
+                status: statusCode,
+            });
+        }
+    }
+
+    //PAYMENT
+    @Put('/user-payment/:userId')
+    async userPayment(@Param('userId') userId: string, @Body() payment: PaymentDto, @Res() res: Response) {
+        try {
+            const newPayment = await this.userService.payment(userId, payment)
+            return res.status(200).json({
+                message: 'The operation was carried out successfully',
+                response: `Your new balance is $${newPayment}`,
+                status: 200,
+            });
+        } catch (error) {
+            const statusCode = error.status || 500;
+            return res.status(statusCode).json({
+                message: error.message || 'Internal Server Error',
+                error: error.name || 'UnknownError',
+                status: statusCode,
+            });
+        }
+    }
+
+    @Get('/get-balance/:userId')
+    async getUserBalance(@Param('userId') userId: string, @Res() res: Response) {
+        try {
+            const balance = await this.userService.getBalance(userId);
+            return res.status(200).json({
+                message: 'User balance',
+                response: balance,
                 status: 200,
             });
         } catch (error) {

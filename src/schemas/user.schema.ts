@@ -45,6 +45,9 @@ export class User extends Document {
     default: [],
   })
   applicants: { applicant: Types.ObjectId; jobTo: string, displayed: boolean }[];
+
+  @Prop({ required: false, default: 100 })
+  balance: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

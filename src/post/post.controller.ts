@@ -3,6 +3,7 @@ import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { PostService } from './post.service';
 import { Response } from 'express';
 import { CreateCommentDto } from 'src/dto/comment.dto';
+import { CreatePostDto } from 'src/dto/create.post.dto';
 
 @Controller('post')
 export class PostController {
@@ -48,7 +49,7 @@ export class PostController {
     }
 
     @Get('/get-post-comments/:postId')
-    async getCommentsPost(@Param('postId') postId:string, @Res() res:Response) {
+    async getCommentsPost(@Param('postId') postId: string, @Res() res: Response) {
         try {
             const postComments = await this.postService.getPostsComments(postId)
             return res.status(200).json({
@@ -66,8 +67,27 @@ export class PostController {
         }
     }
 
+    @Post('/create-post/:userId')
+    async createPostBlog(@Param('userId') userId: string, @Body() newPost: CreatePostDto, @Res() res: Response) {
+        try {
+            const postCreated = await this.postService.createPost(userId, newPost)
+            return res.status(200).json({
+                message: 'Post successfully created',
+                response: postCreated,
+                status: 200,
+            })
+        } catch (error) {
+            const statusCode = error.status || 500;
+            return res.status(statusCode).json({
+                message: error.message || 'Internal Server Error',
+                error: error.name || 'UnknownError',
+                status: statusCode,
+            });
+        }
+    }
+
     @Post('/create-comment/:postId')
-    async createCommentPost(@Param('postId') postId: string, @Body() newComment: CreateCommentDto , @Res() res: Response) {
+    async createCommentPost(@Param('postId') postId: string, @Body() newComment: CreateCommentDto, @Res() res: Response) {
         try {
             const postedComment = await this.postService.postComment(postId, newComment)
             return res.status(200).json({

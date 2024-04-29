@@ -10,6 +10,9 @@ export class Post extends Document {
     @Prop({ required: true })
     postDescription: string;
 
+    @Prop( {required: true} )
+    shortDescription: string;
+
     @Prop({ required: true })
     postAuthor: string;
 

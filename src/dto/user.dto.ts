@@ -33,6 +33,8 @@ export class UserDto {
 
     @IsString()
     userImage: string;
+
+    balance: number;
 }
 
 export class RoleDto {

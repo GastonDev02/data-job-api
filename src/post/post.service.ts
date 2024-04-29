@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateCommentDto } from 'src/dto/comment.dto';
+import { CreatePostDto } from 'src/dto/create.post.dto';
 import { Post } from 'src/schemas/post.schema';
 import { UserService } from 'src/user/user.service';
 
@@ -34,6 +35,27 @@ export class PostService {
         try {
             const getPost = await this.postModel.findById(id)
             return getPost;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async createPost(userId: string, newPost: CreatePostDto) {
+        try {
+            const user = await this.userService.getUser(userId)
+            const { postTitle, postDescription, shortDescription, postCategory, postDate, postImage } = newPost;
+            const createP = {
+                postTitle,
+                postDescription,
+                shortDescription,
+                postAuthor: user.fullname,
+                postCategory,
+                postDate,
+                postImage
+            }
+            const createNewPost = await this.postModel.create(createP)
+            await createNewPost.save()
+            return createNewPost;
         } catch (error) {
             throw error;
         }
