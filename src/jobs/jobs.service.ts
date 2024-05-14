@@ -18,6 +18,20 @@ export class JobsService {
 
     }
 
+    async getJobsByKey(key: string) {
+        try {
+            const findByKey =  await this.jobModel.find({
+                $or: [
+                    { jobTitle: { $regex: new RegExp(key, 'i') } },
+                    { description: { $regex: new RegExp(key, 'i') } }
+                ]
+            });
+            return findByKey;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async getLatest() {
         try {
             return await this.jobModel.find().sort({ createdAt: -1 }).limit(10);

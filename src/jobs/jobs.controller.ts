@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Body, Param, NotFoundException, ConflictException, Res, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, NotFoundException, ConflictException, Res, HttpStatus, Query } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from 'src/dto/create-job.dto';
 import { Response } from 'express';
@@ -31,6 +31,25 @@ export class JobsController {
         }
     }
 
+    @Get('/search-by-key')
+    async searchJobsByKey(@Res() res: Response, @Query('key') key: string) {
+        try {
+            const searchResults = await this.jobService.getJobsByKey(key);
+            return res.status(200).json({
+                message: 'You have applied correctly',
+                searchResults,
+                status: 200,
+            });
+        } catch (error) {
+            const statusCode = error.status || 500;
+            return res.status(statusCode).json({
+                message: error.message || 'Internal Server Error',
+                error: error.name || 'UnknownError',
+                status: statusCode,
+            });
+        }
+    }
+
     @Get(':title')
     async getJobByTitle(@Param('title') title: string) {
         const jobTitle = await this.jobService.getJobByTitle(title)
@@ -39,7 +58,7 @@ export class JobsController {
     }
 
     @Post('/post-job/:userId')
-    async createJob(@Param('userId') userId: string ,@Body() body: CreateJobDto) {
+    async createJob(@Param('userId') userId: string, @Body() body: CreateJobDto) {
         try {
             const createJob = await this.jobService.createJob(userId, body)
             return createJob;
